@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom'
 import logoHaisClinic from '../../assets/logo-haisclinic.png'
+import { NotificacoesDropdown } from '../Notificacoes'
 
 export function Header() {
   return (
@@ -33,6 +34,7 @@ export function Header() {
         >
           Pacientes
         </NavLink>
+        <NotificacoesDropdown />
       </nav>
     </header>
   )
