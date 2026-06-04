@@ -1,0 +1,61 @@
+services:
+  haisclinic-app-frontend:
+    build:
+      context: ./haisclinic-app-frontend
+      args:
+        VITE_CORE_API_URL: http://localhost:8080
+    container_name: haisclinic-app-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - haisclinic-app-backend
+    networks:
+      - haisclinic-network
+
+  haisclinic-app-backend:
+    build:
+      context: ./haisclinic-app-backend
+    container_name: haisclinic-app-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://haisclinic-postgres:5432/haisclinic
+      SPRING_DATASOURCE_USERNAME: haisclinic
+      SPRING_DATASOURCE_PASSWORD: haisclinic
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      APP_STORAGE_IMAGES_DIR: /app/uploads/images
+    volumes:
+      - haisclinic-app-images:/app/uploads/images
+    depends_on:
+      haisclinic-postgres:
+        condition: service_healthy
+    networks:
+      - haisclinic-network
+
+  haisclinic-postgres:
+    image: postgres:16-alpine
+    container_name: haisclinic-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: haisclinic
+      POSTGRES_USER: haisclinic
+      POSTGRES_PASSWORD: haisclinic
+    volumes:
+      - haisclinic-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U haisclinic -d haisclinic"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - haisclinic-network
+
+networks:
+  haisclinic-network:
+    driver: bridge
+
+volumes:
+  haisclinic-postgres-data:
+  haisclinic-app-images:
